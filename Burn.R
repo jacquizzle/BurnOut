@@ -26,7 +26,7 @@ burn.out = burn.out %>%
 #EDA with ggplots
 
 WFH.box = ggplot(data=burn.out, aes(x=WFH.Setup.Available, y=Mental.Fatigue.Score)) +
-  geom_boxplot() + xlab('Ability to Work From Home') + 
+  geom_boxplot(aes(color=WFH.Setup.Available)) + xlab('Ability to Work From Home') + 
   ylab('Mental Fatigue Score')
 
 Designation.box = ggplot(data=burn.out, aes(x=factor(Designation), y=Mental.Fatigue.Score)) + 
@@ -34,7 +34,7 @@ Designation.box = ggplot(data=burn.out, aes(x=factor(Designation), y=Mental.Fati
 Designation.box
 
 total.burn = ggplot(data = burn.out, aes(x=Mental.Fatigue.Score)) +
-  geom_bar()
+  geom_bar(colour="#000099")
 total.burn
 
 
@@ -149,5 +149,33 @@ high.tenure.model = lm(Mental.Fatigue.Score ~ Resource.Allocation + WFH.Setup.Av
 summary(high.tenure.model)
 
 #Missed the mark .. RIP
+#Can time help the model?
+
+date = as.Date('2010-04-27', '%Y-%m-%d')
+class(burn.out$Date.of.Joining)
+burn.out = burn.out %>%
+  mutate(Date.of.Joining = as.Date(Date.of.Joining, '%Y-%m-%d')) %>%
+  mutate(Date.Diff = as.numeric(difftime(date,
+                                         Date.of.Joining,
+                                         units = c('days'))))
+model.w.date = lm(Mental.Fatigue.Score ~ Resource.Allocation + WFH.Setup.Available + 
+                    Designation +Gender + Date.Diff , data = burn.out)
+summary(model.w.date)
+
+#Date makes little to no difference which is honestly good. Going to stick with
+#model reduced after everything
+
+#gathering the data for powerpoint slides 
+
+WFH.box 
+Designation.box + xlab('Tenure Designation') + ylab('Mental Fatigue Score')
+
+resource = ggplot(data = burn.out, aes(x=Resource.Allocation, y=Mental.Fatigue.Score)) +
+  geom_boxplot() + xlab('Resource Allocation') + ylab('Mental Fatigue Score')
+resource
 
 summary(model.burn.reduced)
+
+plot(model.burn.reduced)
+
+total.burn + xlab('Mental Fatigue Score') + ylab('Count')
